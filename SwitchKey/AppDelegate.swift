@@ -178,20 +178,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
     }
 
     private func registerForAppSwitchNotification(_ pid: pid_t) {
-        if pid != getpid() {
-            if applicationObservers[pid] == nil {
-                var observer: AXObserver!
-                guard AXObserverCreate(pid, applicationSwitchedCallback, &observer) == .success else {
-                    fatalError("")
-                }
-                CFRunLoopAddSource(RunLoop.current.getCFRunLoop(), AXObserverGetRunLoopSource(observer), .defaultMode)
-
-                let element = AXUIElementCreateApplication(pid)
-                let selfPtr = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-                AXObserverAddNotification(observer, element, NSAccessibility.Notification.applicationActivated.rawValue as CFString, selfPtr)
-                applicationObservers[pid] = observer
-            }
+        guard pid >= 0 && pid != getpid() else { return }
+        guard applicationObservers[pid] != nil else { return }
+        var observer: AXObserver!
+        guard AXObserverCreate(pid, applicationSwitchedCallback, &observer) == .success else {
+            fatalError("")
         }
+        CFRunLoopAddSource(RunLoop.current.getCFRunLoop(), AXObserverGetRunLoopSource(observer), .defaultMode)
+
+        let element = AXUIElementCreateApplication(pid)
+        let selfPtr = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        AXObserverAddNotification(observer, element, NSAccessibility.Notification.applicationActivated.rawValue as CFString, selfPtr)
+        applicationObservers[pid] = observer
     }
 
     func loadConditions() {
