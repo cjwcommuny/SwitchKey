@@ -16,6 +16,7 @@
 		7B815B702733EC2A0038F194 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 7B815B6F2733EC2A0038F194 /* Defaults */; };
 		7B815B722733EC5C0038F194 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B815B712733EC5C0038F194 /* UserDefaults.swift */; };
 		7B815B742733F0C20038F194 /* NSImageWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B815B732733F0C20038F194 /* NSImageWrapper.swift */; };
+		7B815B792734193C0038F194 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B815B782734193C0038F194 /* MenuView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		71FECF3522610BE600C51FD7 /* SwitchKey.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwitchKey.entitlements; sourceTree = "<group>"; };
 		7B815B712733EC5C0038F194 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		7B815B732733F0C20038F194 /* NSImageWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSImageWrapper.swift; sourceTree = "<group>"; };
+		7B815B782734193C0038F194 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 				718A6EDE2285333700DB6B05 /* NSImage+extensions.swift */,
 				7B815B712733EC5C0038F194 /* UserDefaults.swift */,
 				7B815B732733F0C20038F194 /* NSImageWrapper.swift */,
+				7B815B782734193C0038F194 /* MenuView.swift */,
 			);
 			path = SwitchKey;
 			sourceTree = "<group>";
@@ -163,6 +166,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7B815B792734193C0038F194 /* MenuView.swift in Sources */,
 				71FECF2E22610BE600C51FD7 /* AppDelegate.swift in Sources */,
 				7B815B722733EC5C0038F194 /* UserDefaults.swift in Sources */,
 				7B815B742733F0C20038F194 /* NSImageWrapper.swift in Sources */,

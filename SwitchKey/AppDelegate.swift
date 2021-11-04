@@ -10,6 +10,7 @@ import Cocoa
 import Carbon
 import ServiceManagement
 import Defaults
+import SwiftUI
 
 extension Notification.Name {
     static let killLauncher = Notification.Name("KillSwitchKeyLauncher")
@@ -51,7 +52,10 @@ private func askForAccessibilityPermission() {
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate {
-    @IBOutlet weak var statusBarMenu: NSMenu!
+    private lazy var statusBarMenu: NSMenu = {
+        NSMenu(title: "")
+    }()
+    
     @IBOutlet weak var conditionTableView: TableView! {
         didSet {
             conditionTableView.appDelegate = self
@@ -67,7 +71,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
     private var conditionItems: [CommonCondition] = []
     private var defaultCondition: DefaultCondition = .placeholder
     
-    private var statusBarItem: NSStatusItem!
+    private lazy var statusBarItem: NSStatusItem = {
+        NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    }()
     private var launchAtStartupItem: NSMenuItem!
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -80,20 +86,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
         conditionTableView.dataSource = self
         conditionTableView.delegate = self
         
-        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = statusBarItem.button {
-            button.image = NSImage(named: "StatusIcon")
-        }
-        statusBarItem.menu = statusBarMenu
-        let statusBarMenuViewContainer = statusBarMenu.addItem(withTitle: "", action: nil, keyEquivalent: "")
-        statusBarMenuViewContainer.view = conditionTableView
-        
-        statusBarMenu.addItem(NSMenuItem.separator())
-        launchAtStartupItem = statusBarMenu.addItem(withTitle: "Launch at login", action: #selector(menuDidLaunchAtStartupToggled), keyEquivalent: "")
-        launchAtStartupItem.state = LoginServiceKit.isExistLoginItems() ? .on : .off
-        launchAtStartupItem.target = self
-        
-        statusBarMenu.addItem(withTitle: "Quit", action: #selector(menuDidQuitClicked), keyEquivalent: "").target = self
+        buildStatusBar()
         
         NotificationCenter.default.addObserver(self, selector: #selector(menuDidEndTracking(_:)), name: NSMenu.didEndTrackingNotification, object: nil)
         
@@ -108,6 +101,36 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
         }
         
         applicationSwitched()
+    }
+    
+    private func buildStatusBar() {
+        if let button = statusBarItem.button {
+            button.image = NSImage(named: "StatusIcon")
+        }
+        statusBarItem.menu = statusBarMenu
+        statusBarMenu.addItem(buildContentMenuItem())
+        statusBarMenu.addItem(NSMenuItem.separator())
+        statusBarMenu.addItem(buildLaunchAtStartupMenuItem())
+        statusBarMenu.addItem(buildQuitMenuItem())
+    }
+    
+    private func buildContentMenuItem() -> NSMenuItem {
+        let menuItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        menuItem.view = conditionTableView
+        return menuItem
+    }
+    
+    private func buildLaunchAtStartupMenuItem() -> NSMenuItem {
+        let menuItem = NSMenuItem(title: "Launch at login", action: #selector(menuDidLaunchAtStartupToggled), keyEquivalent: "")
+        menuItem.state = LoginServiceKit.isExistLoginItems() ? .on : .off
+        menuItem.target = self
+        return menuItem
+    }
+    
+    private func buildQuitMenuItem() -> NSMenuItem {
+        let menuItem = NSMenuItem(title: "Quit", action: #selector(menuDidQuitClicked), keyEquivalent: "")
+        menuItem.target = self
+        return menuItem
     }
     
     func applicationWillTerminate(_ notification: Notification) {

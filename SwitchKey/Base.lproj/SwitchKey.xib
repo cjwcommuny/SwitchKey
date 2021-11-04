@@ -16,13 +16,9 @@
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="SwitchKey" customModuleProvider="target">
             <connections>
                 <outlet property="conditionTableView" destination="wpb-1K-Xeg" id="lF5-0a-jaC"/>
-                <outlet property="statusBarMenu" destination="lcZ-64-V4h" id="lFV-82-qrX"/>
             </connections>
         </customObject>
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
-        <menu id="lcZ-64-V4h">
-            <point key="canvasLocation" x="139" y="143"/>
-        </menu>
         <scrollView autohidesScrollers="YES" horizontalLineScroll="26" horizontalPageScroll="10" verticalLineScroll="26" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="ycM-3L-97V">
             <rect key="frame" x="0.0" y="0.0" width="368" height="184"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
