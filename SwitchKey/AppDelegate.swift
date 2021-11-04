@@ -119,30 +119,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
     
     fileprivate func applicationSwitched() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            if let application = NSWorkspace.shared.frontmostApplication {
-                var unMatched = true
-                let switchedPid:pid_t = application.processIdentifier
-                if (switchedPid != self.currentPid && switchedPid != getpid()) {
-                    for condition in self.conditionItems {
-                        if !condition.enabled {
-                            continue
-                        }
-                        if condition.applicationIdentifier == application.bundleIdentifier {
-                            if let inputSource = InputSource.with(condition.inputSourceID) {
-                                inputSource.activate()
-                                unMatched = false
-                            }
-                            break
-                        }
-                    }
-                    if unMatched && self.defaultCondition.inputSourceID != "" && self.defaultCondition.enabled == true {
-                        if let inputSource = InputSource.with(self.defaultCondition.inputSourceID) {
-                            inputSource.activate()
-                        }
-                    }
-                    self.currentPid = switchedPid
+            guard let application = NSWorkspace.shared.frontmostApplication else { return }
+            let switchedPid: pid_t = application.processIdentifier
+            guard switchedPid != self.currentPid && switchedPid != getpid() else { return }
+            let condition = self.conditionItems.filter({ $0.enabled }).first(where: { $0.applicationIdentifier == application.bundleIdentifier })
+            if let condition = condition, let inputSource = InputSource.with(condition.inputSourceID) {
+                inputSource.activate()
+            } else if self.defaultCondition.inputSourceID != "" && self.defaultCondition.enabled {
+                if let inputSource = InputSource.with(self.defaultCondition.inputSourceID) {
+                    inputSource.activate()
                 }
             }
+            self.currentPid = switchedPid
         }
     }
     
@@ -254,11 +242,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
     }
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        if row == 0 {
+        switch row {
+        case 0:
             return conditionTableView.makeView(withIdentifier: editCellIdentifier, owner: nil)
-        } else if row == 1 {
+        case 1:
             return conditionTableView.makeView(withIdentifier: defaultCellIdentifier, owner: nil)
-        } else if row == 2 {
+        case 2:
             let itemCell = conditionTableView.makeView(withIdentifier: itemCellIdentifier, owner: nil) as! ConditionCell
             
             let icon = defaultCondition.inputSourceIcon.image
@@ -270,7 +259,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             
             itemCell.conditionEnabled.state = defaultCondition.enabled ? .on : .off
             return itemCell
-        } else {
+        default:
             let item = conditionItems[row - 3]
             let itemCell = conditionTableView.makeView(withIdentifier: itemCellIdentifier, owner: nil) as! ConditionCell
             itemCell.appIcon.image = item.applicationIcon.image
