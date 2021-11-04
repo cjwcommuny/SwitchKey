@@ -9,6 +9,7 @@
 import Cocoa
 import Carbon
 import ServiceManagement
+import Defaults
 
 extension Notification.Name {
     static let killLauncher = Notification.Name("KillSwitchKeyLauncher")
@@ -37,7 +38,7 @@ private func askForAccessibilityPermission() {
     alert.informativeText = "Please re-launch SwitchKey after you've granted permission in system preferences."
     alert.addButton(withTitle: "Configure Accessibility Settings")
     alert.alertStyle = NSAlert.Style.warning
-
+    
     if alert.runModal() == .alertFirstButtonReturn {
         guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") else {
             return
@@ -59,26 +60,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             conditionTableView.register(NSNib(nibNamed: "SwitchKey", bundle: nil), forIdentifier: defaultCellIdentifier)
         }
     }
-
-    private var applicationObservers:[pid_t:AXObserver] = [:]
-    private var currentPid:pid_t = getpid()
-
-    private var conditionItems: [ConditionItem] = []
-    private var defaultCondition : ConditionItem = ConditionItem()
-
+    
+    private var applicationObservers: [pid_t: AXObserver] = [:]
+    private var currentPid: pid_t = getpid()
+    
+    private var conditionItems: [CommonCondition] = []
+    private var defaultCondition: DefaultCondition = .placeholder
+    
     private var statusBarItem: NSStatusItem!
     private var launchAtStartupItem: NSMenuItem!
-
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if !hasAccessibilityPermission() {
             askForAccessibilityPermission()
         }
-
+        
         loadConditions()
-
+        
         conditionTableView.dataSource = self
         conditionTableView.delegate = self
-
+        
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusBarItem.button {
             button.image = NSImage(named: "StatusIcon")
@@ -86,36 +87,36 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
         statusBarItem.menu = statusBarMenu
         let statusBarMenuViewContainer = statusBarMenu.addItem(withTitle: "", action: nil, keyEquivalent: "")
         statusBarMenuViewContainer.view = conditionTableView
-
+        
         statusBarMenu.addItem(NSMenuItem.separator())
         launchAtStartupItem = statusBarMenu.addItem(withTitle: "Launch at login", action: #selector(menuDidLaunchAtStartupToggled), keyEquivalent: "")
         launchAtStartupItem.state = LoginServiceKit.isExistLoginItems() ? .on : .off
         launchAtStartupItem.target = self
-
+        
         statusBarMenu.addItem(withTitle: "Quit", action: #selector(menuDidQuitClicked), keyEquivalent: "").target = self
-
+        
         NotificationCenter.default.addObserver(self, selector: #selector(menuDidEndTracking(_:)), name: NSMenu.didEndTrackingNotification, object: nil)
-
+        
         let workspace = NSWorkspace.shared
-
+        
         workspace.notificationCenter.addObserver(self, selector: #selector(applicationLaunched(_:)), name: NSWorkspace.didLaunchApplicationNotification, object: workspace)
-
+        
         workspace.notificationCenter.addObserver(self, selector: #selector(applicationTerminated(_:)), name: NSWorkspace.didTerminateApplicationNotification, object: workspace)
-
+        
         for application in workspace.runningApplications {
             registerForAppSwitchNotification(application.processIdentifier)
         }
-
+        
         applicationSwitched()
     }
-
+    
     func applicationWillTerminate(_ notification: Notification) {
         NSWorkspace.shared.notificationCenter.removeObserver(self)
         for (_, observer) in applicationObservers {
             CFRunLoopRemoveSource(RunLoop.current.getCFRunLoop(), AXObserverGetRunLoopSource(observer), .defaultMode)
         }
     }
-
+    
     fileprivate func applicationSwitched() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             if let application = NSWorkspace.shared.frontmostApplication {
@@ -144,11 +145,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             }
         }
     }
-
+    
     @objc private func menuDidEndTracking(_ notification: Notification) {
         conditionTableView.selectRowIndexes([], byExtendingSelection: false)
     }
-
+    
     @objc private func menuDidLaunchAtStartupToggled() {
         if launchAtStartupItem.state == .on {
             launchAtStartupItem.state = .off
@@ -158,17 +159,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             LoginServiceKit.addLoginItems()
         }
     }
-
+    
     @objc private func menuDidQuitClicked() {
         NSApplication.shared.terminate(nil)
     }
-
+    
     @objc private func applicationLaunched(_ notification: NSNotification) {
         let pid = notification.userInfo!["NSApplicationProcessIdentifier"] as! pid_t
         registerForAppSwitchNotification(pid)
         applicationSwitched()
     }
-
+    
     @objc private func applicationTerminated(_ notification: NSNotification) {
         let pid = notification.userInfo!["NSApplicationProcessIdentifier"] as! pid_t
         if let observer = applicationObservers[pid] {
@@ -176,7 +177,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             applicationObservers.removeValue(forKey: pid)
         }
     }
-
+    
     private func registerForAppSwitchNotification(_ pid: pid_t) {
         guard pid >= 0 && pid != getpid() else { return }
         guard applicationObservers[pid] != nil else { return }
@@ -185,66 +186,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             fatalError("")
         }
         CFRunLoopAddSource(RunLoop.current.getCFRunLoop(), AXObserverGetRunLoopSource(observer), .defaultMode)
-
+        
         let element = AXUIElementCreateApplication(pid)
         let selfPtr = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         AXObserverAddNotification(observer, element, NSAccessibility.Notification.applicationActivated.rawValue as CFString, selfPtr)
         applicationObservers[pid] = observer
     }
-
+    
     func loadConditions() {
-        if let conditions = UserDefaults.standard.array(forKey: "Conditions") as? [[String:Any]] {
-            defer {
-                conditionTableView.reloadData()
-            }
-            for c in conditions {
-                if c["IsDefault"] != nil && c["IsDefault"] as! Bool == true {
-                    if let inputSource = InputSource.with(c["InputSourceID"] as! String) {
-                        defaultCondition.inputSourceID = inputSource.inputSourceID();
-                        defaultCondition.inputSourceIcon = inputSource.icon()
-                        if c["Enabled"] != nil {
-                            defaultCondition.enabled = c["Enabled"] as! Bool
-                        }
-                    }
-                    continue
-                }
-                let conditionItem = ConditionItem()
-                if let inputSource = InputSource.with(c["InputSourceID"] as! String) {
-                    conditionItem.applicationIdentifier = c["ApplicationIdentifier"] as! String
-                    conditionItem.inputSourceID = inputSource.inputSourceID();
-                    conditionItem.enabled = c["Enabled"] as! Bool
-                    conditionItem.inputSourceIcon = inputSource.icon()
-                    conditionItem.applicationName = c["ApplicationName"] as! String
-                    conditionItem.applicationIcon = NSImage(data: c["ApplicationIcon"] as! Data)!
-                    conditionItems.append(conditionItem)
-                }
-            }
+        defer {
+            conditionTableView.reloadData()
         }
+        self.conditionItems = Defaults[.commonConditions]
+        self.defaultCondition = Defaults[.defaultCondition]
     }
-
+    
     func saveConditions() {
-        var conditions:[[String:Any]] = []
-        for conditionItem in conditionItems {
-            var c:[String:Any] = [:]
-            c["ApplicationIdentifier"] = conditionItem.applicationIdentifier
-            c["InputSourceID"] = conditionItem.inputSourceID
-            c["Enabled"] = conditionItem.enabled
-
-            c["ApplicationName"] = conditionItem.applicationName
-            let cgRef = conditionItem.applicationIcon.cgImage(forProposedRect: nil, context: nil, hints: nil)
-            let pngData = NSBitmapImageRep(cgImage: cgRef!)
-            pngData.size = conditionItem.applicationIcon.size
-            c["ApplicationIcon"] = pngData.representation(using: .png, properties: [:])
-
-            conditions.append(c)
-        }
-        var defaultC = [String:Any]()
-        defaultC["IsDefault"] = true
-        defaultC["InputSourceID"] = defaultCondition.inputSourceID
-        defaultC["Enabled"] = defaultCondition.enabled
-        conditions.append(defaultC)
-        
-        UserDefaults.standard.set(conditions, forKey: "Conditions")
+        Defaults[.commonConditions] = self.conditionItems
+        Defaults[.defaultCondition] = self.defaultCondition
     }
     
     func setDefaultCondition() {
@@ -253,49 +212,39 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             saveConditions()
         }
         let inputSource = InputSource.current()
-        defaultCondition.inputSourceID = inputSource.inputSourceID()
-        defaultCondition.inputSourceIcon = inputSource.icon()
-        defaultCondition.enabled = true
+        self.defaultCondition = DefaultCondition(
+            inputSourceID: inputSource.inputSourceID(),
+            inputSourceIcon: NSImageWrapper(inputSource.icon()),
+            enabled: true
+        )
     }
-
+    
     func addCondition() {
-        if let currentApplication = NSWorkspace.shared.frontmostApplication {
-            var newItemRow = 0;
-            defer {
-                conditionTableView.reloadData()
-                conditionTableView.selectRowIndexes([newItemRow], byExtendingSelection: false)
-                saveConditions()
-            }
-            let inputSource = InputSource.current()
-
-            if conditionItems.count > 0 {
-                for row in 1 ... conditionItems.count {
-                    let conditionItem = conditionItems[row - 1]
-                    if conditionItem.applicationIdentifier == currentApplication.bundleIdentifier {
-                        conditionItem.inputSourceID = inputSource.inputSourceID()
-                        conditionItem.inputSourceIcon = inputSource.icon()
-                        newItemRow = row;
-                        return
-                    }
-                }
-            }
-
-            let conditionItem = ConditionItem()
-
-            conditionItem.applicationIdentifier = currentApplication.bundleIdentifier ?? ""
-            conditionItem.applicationName = currentApplication.localizedName ?? ""
-            conditionItem.applicationIcon = currentApplication.icon ?? NSImage()
-
-            conditionItem.inputSourceID = inputSource.inputSourceID()
-            conditionItem.inputSourceIcon = inputSource.icon()
-
-            conditionItem.enabled = true
-
-            conditionItems.insert(conditionItem, at: 0)
-            newItemRow = 1;
+        guard let currentApplication = NSWorkspace.shared.frontmostApplication else { return }
+        defer {
+            conditionTableView.reloadData()
+            conditionTableView.selectRowIndexes([1], byExtendingSelection: false)
+            saveConditions()
         }
+        let inputSource = InputSource.current()
+        
+        let currentAppItemIndex = conditionItems.firstIndex(where: { $0.applicationIdentifier == currentApplication.bundleIdentifier })
+        if let currentAppItemIndex = currentAppItemIndex {
+            conditionItems[currentAppItemIndex].inputSourceID = inputSource.inputSourceID()
+            conditionItems[currentAppItemIndex].inputSourceIcon = .init(inputSource.icon())
+        }
+        
+        let conditionItem = CommonCondition(
+            applicationIdentifier: currentApplication.bundleIdentifier ?? "",
+            inputSourceID: inputSource.inputSourceID(),
+            inputSourceIcon: NSImageWrapper(inputSource.icon()),
+            enabled: true,
+            applicationName: currentApplication.localizedName ?? "",
+            applicationIcon: NSImageWrapper(currentApplication.icon ?? NSImage())
+        )
+        conditionItems.insert(conditionItem, at: 0)
     }
-
+    
     func removeCondition(row: Int) {
         if row > 2 {
             conditionItems.remove(at: row - 3)
@@ -303,7 +252,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             saveConditions()
         }
     }
-
+    
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         if row == 0 {
             return conditionTableView.makeView(withIdentifier: editCellIdentifier, owner: nil)
@@ -312,7 +261,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
         } else if row == 2 {
             let itemCell = conditionTableView.makeView(withIdentifier: itemCellIdentifier, owner: nil) as! ConditionCell
             
-            let icon = defaultCondition.inputSourceIcon
+            let icon = defaultCondition.inputSourceIcon.image
             itemCell.appName.stringValue = "Default"
             itemCell.appIcon.image = NSImage()
             
@@ -324,10 +273,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
         } else {
             let item = conditionItems[row - 3]
             let itemCell = conditionTableView.makeView(withIdentifier: itemCellIdentifier, owner: nil) as! ConditionCell
-            itemCell.appIcon.image = item.applicationIcon
+            itemCell.appIcon.image = item.applicationIcon.image
             itemCell.appName.stringValue = item.applicationName
             
-            let icon = item.inputSourceIcon
+            let icon = item.inputSourceIcon.image
             itemCell.inputSourceButton.image = icon
             itemCell.inputSourceButton.image?.isTemplate = icon.canTemplate()
             
@@ -335,7 +284,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             return itemCell
         }
     }
-
+    
     func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
         if row == 2 {
             return defaultCondition
@@ -345,7 +294,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             return self
         }
     }
-
+    
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
         if row > 1 {
             return 64
@@ -353,13 +302,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
             return 24
         }
     }
-
+    
     func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
         let view = TableRowView()
         view.highlight = row > 1
         return view
     }
-
+    
     func numberOfRows(in tableView: NSTableView) -> Int {
         return conditionItems.count + 3
     }
@@ -367,14 +316,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
 
 class TableView: NSTableView {
     var appDelegate: AppDelegate! = nil
-
+    
     override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         let rowAtPoint = row(at: point)
         selectRowIndexes([rowAtPoint], byExtendingSelection: false)
         super.mouseDown(with: event)
     }
-
+    
     override func keyDown(with event: NSEvent) {
         if event.type == NSEvent.EventType.keyDown && event.keyCode == kVK_Delete {
             appDelegate.removeCondition(row: selectedRow)
@@ -386,7 +335,7 @@ class TableView: NSTableView {
 
 class TableRowView: NSTableRowView {
     var highlight: Bool = true
-
+    
     override func drawSelection(in dirtyRect: NSRect) {
         if highlight {
             NSColor.labelColor.withAlphaComponent(0.2).setFill()
@@ -395,28 +344,20 @@ class TableRowView: NSTableRowView {
     }
 }
 
-class ConditionItem {
-    var applicationIdentifier: String = ""
-    var applicationName: String = ""
-    var applicationIcon: NSImage = NSImage()
-    var inputSourceID: String = ""
-    var inputSourceIcon: NSImage = NSImage()
-    var enabled: Bool = false
-}
-
 class ConditionCell: NSTableCellView {
     @IBOutlet weak var appIcon: NSImageView!
     @IBOutlet weak var appName: NSTextField!
     @IBOutlet weak var conditionEnabled: NSButton!
     @IBOutlet weak var inputSourceButton: NSButton!
     @IBAction func inputSourceButtonClicked(_ sender: Any) {
-        let item = objectValue as! ConditionItem
+        let item = objectValue as! Condition
         if let inputSource = InputSource.with(item.inputSourceID) {
             inputSource.activate()
         }
     }
+    
     @IBAction func toggleEnabled(_ sender: Any) {
-        let item = objectValue as! ConditionItem
+        var item = objectValue as! Condition
         item.enabled = conditionEnabled.state == .on;
     }
 }
@@ -436,7 +377,7 @@ class DefaultCell: NSTableCellView {
 }
 
 extension String {
-subscript(to: Int) -> String {
+    subscript(to: Int) -> String {
         let index = self.index(self.startIndex, offsetBy: to)
         return String(self[..<index])
     }

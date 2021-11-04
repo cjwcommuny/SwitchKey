@@ -7,6 +7,12 @@ Automatically use the correct input source.
 Ever hassled by wrong input source when switching application?  
 SwitchKey can automatically activate your choice for you.
 
+## TODO
+
+1. use swiftUI
+2. use typed user default
+3. use loginitem-kit swift package
+
 ## Download & Install
 
 ### Manually:

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,9 @@
 		718A6EDF2285333700DB6B05 /* NSImage+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718A6EDE2285333700DB6B05 /* NSImage+extensions.swift */; };
 		71FECF2E22610BE600C51FD7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71FECF2D22610BE600C51FD7 /* AppDelegate.swift */; };
 		71FECF3322610BE600C51FD7 /* SwitchKey.xib in Resources */ = {isa = PBXBuildFile; fileRef = 71FECF3122610BE600C51FD7 /* SwitchKey.xib */; };
+		7B815B702733EC2A0038F194 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 7B815B6F2733EC2A0038F194 /* Defaults */; };
+		7B815B722733EC5C0038F194 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B815B712733EC5C0038F194 /* UserDefaults.swift */; };
+		7B815B742733F0C20038F194 /* NSImageWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B815B732733F0C20038F194 /* NSImageWrapper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +30,8 @@
 		71FECF3222610BE600C51FD7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/SwitchKey.xib; sourceTree = "<group>"; };
 		71FECF3422610BE600C51FD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		71FECF3522610BE600C51FD7 /* SwitchKey.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwitchKey.entitlements; sourceTree = "<group>"; };
+		7B815B712733EC5C0038F194 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
+		7B815B732733F0C20038F194 /* NSImageWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSImageWrapper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,6 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7B815B702733EC2A0038F194 /* Defaults in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -69,6 +75,8 @@
 				7115A91322631E6A00DD386A /* SwitchKey-Bridging-Header.h */,
 				716404ED226A0FFB00E0F0A1 /* LoginServiceKit.swift */,
 				718A6EDE2285333700DB6B05 /* NSImage+extensions.swift */,
+				7B815B712733EC5C0038F194 /* UserDefaults.swift */,
+				7B815B732733F0C20038F194 /* NSImageWrapper.swift */,
 			);
 			path = SwitchKey;
 			sourceTree = "<group>";
@@ -89,6 +97,9 @@
 			dependencies = (
 			);
 			name = SwitchKey;
+			packageProductDependencies = (
+				7B815B6F2733EC2A0038F194 /* Defaults */,
+			);
 			productName = context;
 			productReference = 71FECF2A22610BE600C51FD7 /* SwitchKey.app */;
 			productType = "com.apple.product-type.application";
@@ -123,6 +134,9 @@
 				Base,
 			);
 			mainGroup = 71FECF2122610BE600C51FD7;
+			packageReferences = (
+				7B815B6E2733EC2A0038F194 /* XCRemoteSwiftPackageReference "Defaults" */,
+			);
 			productRefGroup = 71FECF2B22610BE600C51FD7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -150,6 +164,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				71FECF2E22610BE600C51FD7 /* AppDelegate.swift in Sources */,
+				7B815B722733EC5C0038F194 /* UserDefaults.swift in Sources */,
+				7B815B742733F0C20038F194 /* NSImageWrapper.swift in Sources */,
 				716404EE226A0FFB00E0F0A1 /* LoginServiceKit.swift in Sources */,
 				718A6EDF2285333700DB6B05 /* NSImage+extensions.swift in Sources */,
 				7115A91622631E6A00DD386A /* InputSource.m in Sources */,
@@ -302,7 +318,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = itsuhane.tools.SwitchKey;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -327,7 +343,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = itsuhane.tools.SwitchKey;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -358,6 +374,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7B815B6E2733EC2A0038F194 /* XCRemoteSwiftPackageReference "Defaults" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:sindresorhus/Defaults.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7B815B6F2733EC2A0038F194 /* Defaults */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7B815B6E2733EC2A0038F194 /* XCRemoteSwiftPackageReference "Defaults" */;
+			productName = Defaults;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 71FECF2222610BE600C51FD7 /* Project object */;
 }
