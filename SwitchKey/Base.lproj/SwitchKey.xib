@@ -20,20 +20,20 @@
         </customObject>
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <scrollView autohidesScrollers="YES" horizontalLineScroll="26" horizontalPageScroll="10" verticalLineScroll="26" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="ycM-3L-97V">
-            <rect key="frame" x="0.0" y="0.0" width="368" height="184"/>
+            <rect key="frame" x="0.0" y="0.0" width="190" height="150"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <clipView key="contentView" id="gGO-yu-YCr">
-                <rect key="frame" x="1" y="1" width="366" height="182"/>
+                <rect key="frame" x="1" y="1" width="188" height="148"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" tableStyle="fullWidth" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="24" usesAutomaticRowHeights="YES" viewBased="YES" id="wpb-1K-Xeg" customClass="TableView" customModule="SwitchKey" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="0.0" width="366" height="182"/>
+                        <rect key="frame" x="0.0" y="0.0" width="188" height="148"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <size key="intercellSpacing" width="3" height="2"/>
                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                         <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                         <tableColumns>
-                            <tableColumn width="354" minWidth="40" maxWidth="1000" id="Y12-MF-ZTz">
+                            <tableColumn width="176" minWidth="40" maxWidth="1000" id="Y12-MF-ZTz">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -50,7 +50,7 @@
                 </subviews>
             </clipView>
             <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="bzu-Fw-U6m">
-                <rect key="frame" x="1" y="167" width="366" height="16"/>
+                <rect key="frame" x="1" y="167" width="188" height="16"/>
                 <autoresizingMask key="autoresizingMask"/>
             </scroller>
             <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="5LF-KM-I9F">
@@ -60,7 +60,7 @@
             <point key="canvasLocation" x="132" y="-33"/>
         </scrollView>
         <tableCellView identifier="item-cell" translatesAutoresizingMaskIntoConstraints="NO" id="mER-eV-t2b" customClass="ConditionCell" customModule="SwitchKey" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="341" height="64"/>
+            <rect key="frame" x="0.0" y="0.0" width="180" height="64"/>
             <subviews>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="iRL-OQ-vsx">
                     <rect key="frame" x="8" y="8" width="48" height="48"/>
@@ -79,7 +79,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Sco-0x-N6p">
-                    <rect key="frame" x="317" y="23" width="18" height="18"/>
+                    <rect key="frame" x="156" y="23" width="18" height="18"/>
                     <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="overlaps" state="on" inset="2" id="qOW-ws-dWx">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
@@ -89,7 +89,7 @@
                     </connections>
                 </button>
                 <button translatesAutoresizingMaskIntoConstraints="NO" id="p83-hg-Sms">
-                    <rect key="frame" x="295" y="24" width="16" height="16"/>
+                    <rect key="frame" x="134" y="24" width="16" height="16"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="16" id="52L-E7-7fe"/>
                         <constraint firstAttribute="height" constant="16" id="krz-z6-4aC"/>
@@ -124,11 +124,11 @@
             <point key="canvasLocation" x="140" y="230"/>
         </tableCellView>
         <tableCellView identifier="edit-cell" misplaced="YES" id="tGE-D6-w3H" customClass="EditCell" customModule="SwitchKey" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="341" height="42"/>
+            <rect key="frame" x="0.0" y="0.0" width="180" height="42"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5k7-2A-D1v">
-                    <rect key="frame" x="8" y="7" width="325" height="31"/>
+                    <rect key="frame" x="8" y="7" width="164" height="31"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="30" id="0sl-cE-5EX"/>
                     </constraints>
@@ -150,11 +150,11 @@
             <point key="canvasLocation" x="139.5" y="320"/>
         </tableCellView>
         <tableCellView identifier="default-cell" id="veh-uT-FUu" customClass="DefaultCell" customModule="SwitchKey" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="341" height="46"/>
+            <rect key="frame" x="0.0" y="0.0" width="180" height="46"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="30X-lg-cGL">
-                    <rect key="frame" x="8" y="7" width="325" height="31"/>
+                    <rect key="frame" x="8" y="7" width="164" height="31"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="30" id="dHg-YZ-A38"/>
                     </constraints>
