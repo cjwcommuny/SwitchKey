@@ -112,6 +112,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTab
         statusBarMenu.addItem(NSMenuItem.separator())
         statusBarMenu.addItem(buildLaunchAtStartupMenuItem())
         statusBarMenu.addItem(buildQuitMenuItem())
+        statusBarMenu.addItem(NSMenuItem.separator())
+        statusBarMenu.addItem(buildSwiftUIMenuItem())
+    }
+    
+    private func buildSwiftUIMenuItem() -> NSMenuItem {
+        let menuItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        let view = NSHostingView(rootView: MenuView())
+        view.frame = NSRect(x: 0, y: 0, width: 200, height: 200)
+        menuItem.view = view
+        return menuItem
     }
     
     private func buildContentMenuItem() -> NSMenuItem {
