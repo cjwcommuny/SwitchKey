@@ -8,15 +8,45 @@
 
 import SwiftUI
 
-struct MenuView: View {
+struct MenuItemView: View {
+    @EnvironmentObject private var model: Model
+    @Binding var condition: CommonCondition
+    
     var body: some View {
-        Text("hello world")
-        Text("!!!!!!")
+        HStack {
+            Toggle("No Label", isOn: $condition.enabled)
+                .labelsHidden()
+            Image(nsImage: condition.inputSourceIcon.image)
+            Spacer()
+            Image(nsImage: condition.applicationIcon.image)
+            Text(condition.applicationName)
+            Button(
+                action: {
+                    model.delete(applicationIdentifier: condition.applicationIdentifier)
+                } ) { Image(systemName: "xmark.circle.fill") }.buttonStyle(PlainButtonStyle())
+        }
+    }
+}
+
+struct MenuView: View {
+    @EnvironmentObject private var model: Model
+    @State private var selection: CommonCondition?
+    
+    var body: some View {
+        List(selection: $selection) {
+            ForEach($model.conditionItems) { item in
+                MenuItemView(condition: item)
+            }
+        }
+        .listStyle(.sidebar)
     }
 }
 
 struct MenuView_Previews: PreviewProvider {
+    private static let model = Model()
+    
     static var previews: some View {
-        MenuView()
+        model.loadDefaults()
+        return MenuView().environmentObject(model)
     }
 }
